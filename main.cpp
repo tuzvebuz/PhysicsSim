@@ -1,11 +1,37 @@
 #include <SFML/Graphics.hpp>
 #include "particle.h"
 #include <memory>
-
+#include <random>
 #include<sstream>
 
+float returnRad() { 
+  float min = 1.f;
+  float max = 12.5f;
+  
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<float> dist(min, max);
 
 
+  float randFloat = dist(gen);
+
+  return randFloat;
+}
+
+float randPos() {
+  float min = 0;
+  float max = 800;
+  
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<float> dist(min, max);
+
+
+  float randFloat = dist(gen);
+
+  return randFloat;
+
+}
 
 
 int main(int argc, char const *argv[])
@@ -14,7 +40,7 @@ int main(int argc, char const *argv[])
     sf::RenderWindow window(sf::VideoMode(800,800), "Particle Simulation Test");
      // Particle & physics maybe
     sf::Clock clock;
-
+    
     // List of particles
     std::vector<std::unique_ptr<Particle>> particles;
    
@@ -45,8 +71,13 @@ int main(int argc, char const *argv[])
                 window.close();
             }
             if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+              float rx = returnRad();
+              float ry = randPos();
+              float rz = randPos();
+
+              sf::Vector3f particleAtts(rx,ry,rz);  
               particles.push_back(std::make_unique<Particle>(
-                                      mousePos.x, mousePos.y,5.0f
+                                      ry, rz,rx
                     ));
               
               amountParticles += 1;
@@ -61,6 +92,8 @@ int main(int argc, char const *argv[])
         window.clear();
         window.draw(text);
         for (const auto& p : particles) {
+          
+
           sf::CircleShape circle(p->radius);
           circle.setPosition(p->x, p->y);
           circle.setFillColor(sf::Color::White);

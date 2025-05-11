@@ -38,12 +38,12 @@ int main(int argc, char const *argv[])
 {
   // Window 800 by 800 pixels, 
     sf::RenderWindow window(sf::VideoMode(800,800), "Particle Simulation Test");
-     // Particle & physics maybe
     sf::Clock clock;
-    
+     // Particle & physics maybe
     // List of particles
     std::vector<std::unique_ptr<Particle>> particles;
-   
+
+
     // Font setup
     sf::Font font;
     if (!font.loadFromFile("arial.ttf")) {
@@ -62,6 +62,8 @@ int main(int argc, char const *argv[])
     // Main loop, if button pressed increment var with 1 and print it on screen
     while (window.isOpen())
     {
+        float deltaTime = clock.restart().asSeconds();
+        
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -84,13 +86,16 @@ int main(int argc, char const *argv[])
               std::string XPos = std::to_string(mousePos.x);
     
               std::string partic = std::to_string(amountParticles);
-              text.setString(XPos);
+              text.setString(partic);
             }
             
         }
         text.setCharacterSize(24);
         window.clear();
         window.draw(text);
+        float vx = 10;
+        float vy = 5;
+
         for (const auto& p : particles) {
           
 
@@ -99,7 +104,11 @@ int main(int argc, char const *argv[])
           circle.setFillColor(sf::Color::White);
           window.draw(circle);
         }
-         
+        for (const auto& p : particles) {
+          p->x += vx * deltaTime;
+          p->y += vy * deltaTime;
+
+        }
         window.display();
         
     }

@@ -107,6 +107,12 @@ int main(int argc, char const *argv[])
         for (const auto& p : particles) {
           p->x += vx * deltaTime;
           p->y += vy * deltaTime;
+          if (p->x > 750) {
+            p->x = 750;
+          }
+          if (p->y > 600) {
+            p->y = 599;
+          }
 
         }
         window.display();

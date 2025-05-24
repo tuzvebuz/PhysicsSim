@@ -2,93 +2,75 @@
 #include "particle.h"
 #include <memory>
 #include <random>
-#include<sstream>
-
-float returnRad() { 
-  float min = 1.f;
-  float max = 12.5f;
-  
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<float> dist(min, max);
+#include <sstream>
+#include <iostream>
+#include <vector>
 
 
-  float randFloat = dist(gen);
-
-  return randFloat;
-}
-
-float randPos() {
-  float min = 0;
-  float max = 800;
-  
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_real_distribution<float> dist(min, max);
-
-
-  float randFloat = dist(gen);
-
-  return randFloat;
-
+float getRandomFloat(float min, float max) {
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dist  (min, max);
+    return dist(gen);
 }
 
 
 int main(int argc, char const *argv[])
 {
-  // Window 800 by 800 pixels, 
+    // Window 800 by 800 pixels,
     sf::RenderWindow window(sf::VideoMode(800,800), "Particle Simulation Test");
     sf::Clock clock;
-     // Particle & physics maybe
+    // Particle & physics maybe
     // List of particles
     std::vector<std::unique_ptr<Particle>> particles;
 
 
     // Font setup
     sf::Font font;
-    if (!font.loadFromFile("arial.ttf")) {
-      return -1;
+    if (!font.loadFromFile("C:/Users/esadk/OneDrive/Desktop/Programming/BuzEngine/arial.ttf")) {
+        return -1;
     }
     sf::Text text;
     text.setFont(font);
     std::string partic;
-    
+
 
 
     // FIrst manually created particle object
-   
+
     int amountParticles = 0;
-    
+
     // Main loop, if button pressed increment var with 1 and print it on screen
     while (window.isOpen())
     {
         float deltaTime = clock.restart().asSeconds();
-        
+
         sf::Event event;
         while (window.pollEvent(event))
         {
             sf::Vector2i mousePos = sf::Mouse::getPosition();
-          
+
             if(event.type == sf::Event::Closed){
                 window.close();
             }
             if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-              float rx = returnRad();
-              float ry = randPos();
-              float rz = randPos();
+                float rx = getRandomFloat(1.f, 12.5f);
+                float ry = getRandomFloat(0.f, 800.f);
+                float rz = getRandomFloat(0.f, 800.f);
 
-              sf::Vector3f particleAtts(rx,ry,rz);  
-              particles.push_back(std::make_unique<Particle>(
-                                      ry, rz,rx
-                    ));
-              
-              amountParticles += 1;
-              std::string XPos = std::to_string(mousePos.x);
-    
-              std::string partic = std::to_string(amountParticles);
-              text.setString(partic);
+
+                sf::Vector3f particleAtts(rx,ry,rz);
+                particles.push_back(std::make_unique<Particle>(
+                        ry, rz,rx
+                ));
+
+                amountParticles += 1;
+                std::string XPos = std::to_string(mousePos.x);
+
+                std::string partic = std::to_string(amountParticles);
+                text.setString(partic);
             }
-            
+
         }
         text.setCharacterSize(24);
         window.clear();
@@ -96,27 +78,29 @@ int main(int argc, char const *argv[])
         float vx = 10;
         float vy = 5;
 
+        // TEKENEN
         for (const auto& p : particles) {
-          
+            sf::CircleShape circle(p->radius);
+            circle.setPosition(p->x, p->y);
+            circle.setFillColor(sf::Color::White);
+            window.draw(circle);
 
-          sf::CircleShape circle(p->radius);
-          circle.setPosition(p->x, p->y);
-          circle.setFillColor(sf::Color::White);
-          window.draw(circle);
         }
+        // BEWEGING
         for (const auto& p : particles) {
-          p->x += vx * deltaTime;
-          p->y += vy * deltaTime;
-          if (p->x > 750) {
-            p->x = 750;
-          }
-          if (p->y > 600) {
-            p->y = 599;
-          }
+            p->resolveCollision(particles);
+            p->x += vx * deltaTime;
+            p->y += vy * deltaTime;
+            if (p->x > 750) {
+                p->x = 750;
+            }
+            if (p->y > 600) {
+                p->y = 599;
+            }
 
         }
         window.display();
-        
+
     }
 
     return 0;
